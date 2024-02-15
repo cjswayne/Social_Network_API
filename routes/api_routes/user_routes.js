@@ -12,8 +12,6 @@ router.get("/users", async (req, res) => {
         .populate('friends', 'username email -_id')
         .populate('thoughts');
 
-
-
         res.json(users);
   } catch (err) {
     errorHandler(err, res);
@@ -51,7 +49,7 @@ router.put("/users", async (req, res) => {
 });
 
 // Route to delete user by id
-router.delete("/users", async (req, res) => {
+router.delete("/users/:user_id", async (req, res) => {
   // remove associated thoughts when deleted
   try {
   } catch (err) {
