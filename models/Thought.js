@@ -5,7 +5,7 @@ const thoughtSchema = new Schema({
     thoughtText:{
         type: String,
         required: [true, 'Your thought must not be blank'],
-        maxlength:[280, 'Your thought cannot exceed 280chars']
+        maxlength:[280, 'Your thought cannot exceed 280 chars']
     },
     createdAt: {
         type:Date,

@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const {errorHandler} = require('../helpers') 
-const {User} = require('../../models')
+const { errorHandler } = require("../helpers");
+const { User } = require("../../models");
 
 // EVERYTHING IS PREFIXED WITH /api
 
@@ -8,22 +8,22 @@ const {User} = require('../../models')
 router.get("/users", async (req, res) => {
   try {
     const users = await User.find({})
-        .select('username email friends friendCount')
-        .populate('friends', 'username email -_id')
-        .populate('thoughts');
+      .select("username email friends friendCount")
+      .populate("friends", "username email -_id")
+      .populate("thoughts");
 
-        res.json(users);
+    res.json(users);
   } catch (err) {
     errorHandler(err, res);
   }
 });
 
 // Route to  get a user by its ID
-router.get("/users/:user_id", async ({ params: {user_id} }, res) => {
+router.get("/users/:user_id", async ({ params: { user_id } }, res) => {
   try {
-    const user = await User.findById(user_id)
+    const user = await User.findById(user_id);
 
-    res.json(user)
+    res.json(user);
   } catch (err) {
     errorHandler(err, res);
   }
@@ -41,36 +41,135 @@ router.post("/users", async (req, res) => {
 });
 
 // Route to update(put) a user by its ID
-router.put("/users", async (req, res) => {
-  try {
-  } catch (err) {
-    errorHandler(err, res);
+router.put(
+  "/users/:user_id",
+  async ({ params: { user_id }, body: updateData }, res) => {
+    try {
+      const updatedUser = await User.findByIdAndUpdate(user_id, updateData, {
+        new: true,
+        runValidators: true,
+      });
+      if (!updatedUser) {
+        return res
+          .status(404)
+          .json({ message: "User not found with id " + user_id });
+      }
+
+      res.json(updatedUser);
+    } catch (err) {
+      errorHandler(err, res);
+    }
   }
-});
+);
 
 // Route to delete user by id
-router.delete("/users/:user_id", async (req, res) => {
+router.delete("/users/:user_id", async ({ params: { user_id } }, res) => {
   // remove associated thoughts when deleted
   try {
+    const user = await User.findByIdAndDelete(user_id);
+    
+   
+    res.json({
+      message: "User deleted.",
+      user,
+    });
   } catch (err) {
     errorHandler(err, res);
   }
 });
 
 // Route to post new friend to user friend list
-router.post("/api/users/:userId/friends/:friendId", async (req, res) => {
-  try {
-  } catch (err) {
-    errorHandler(err, res);
+router.post(
+  "/users/:user_id/friends/:friend_id",
+  async ({ params: { user_id, friend_id } }, res) => {
+    try {
+      const user = await User.findById(user_id);
+
+      let errorResponse = null;
+
+      if (!user) {
+        errorResponse = { status: 404, message: "User not found." };
+      } else if (user.friends.includes(friend_id)) {
+        errorResponse = { status: 400, message: "They are already friends" };
+      } else if (user_id === friend_id) {
+        errorResponse = {
+          status: 400,
+          message: "You cannot add the user to it's own friends list",
+        };
+      }
+
+      if (errorResponse) {
+        return res.status(errorResponse.status).json(errorResponse.message);
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(
+        user_id,
+        {
+          $push: {
+            friends: friend_id,
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return res.status(503).json({
+          message: "Cannot update user.",
+        });
+      }
+      return res.json({
+        message: "Friend added successfully.",
+        updatedUser,
+      });
+    } catch (err) {
+      errorHandler(err, res);
+    }
   }
-});
+);
 
 // Route to delete friend from user's friend list
-router.delete("/api/users/:userId/friends/:friendId", async (req, res) => {
-  try {
-  } catch (err) {
-    errorHandler(err, res);
+router.delete(
+  "/users/:user_id/friends/:friend_id",
+  async ({ params: { user_id, friend_id } }, res) => {
+    try {
+      const user = await User.findById(user_id);
+      console.log(user_id);
+
+      let errorResponse = null;
+
+      if (!user) {
+        errorResponse = { status: 404, message: "User not found." };
+      } else if (!user.friends.includes(friend_id)) {
+        errorResponse = { status: 400, message: "They are not friends" };
+      } else if (user_id === friend_id) {
+        errorResponse = {
+          status: 400,
+          message: "User ID and Friend ID are the same.",
+        };
+      }
+
+      if (errorResponse) {
+        return res.status(errorResponse.status).json(errorResponse.message);
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(        
+        user_id,
+        {
+          $pull: {
+            friends: friend_id,
+          },
+        },
+        { new: true })
+
+
+        return res.json({
+          message: "Friend deleted successfully.",
+          updatedUser,
+        });
+    } catch (err) {
+      errorHandler(err, res);
+    }
   }
-});
+);
 
 module.exports = router;
