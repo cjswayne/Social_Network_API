@@ -27,7 +27,7 @@ This is how you can make requests to this api from your computer. Make sure you 
 
 ## Usage
 
-  ![https://www.loom.com/share/18b357ccf2ce4cba9f2c020bb5774da8?sid=be8692a6-1c6e-43ad-b7ff-f50c264273c8](https://www.loom.com/share/18b357ccf2ce4cba9f2c020bb5774da8?sid=be8692a6-1c6e-43ad-b7ff-f50c264273c8)
+  [https://www.loom.com/share/18b357ccf2ce4cba9f2c020bb5774da8?sid=be8692a6-1c6e-43ad-b7ff-f50c264273c8](https://www.loom.com/share/18b357ccf2ce4cba9f2c020bb5774da8?sid=be8692a6-1c6e-43ad-b7ff-f50c264273c8)
 
 
 ## Credits
