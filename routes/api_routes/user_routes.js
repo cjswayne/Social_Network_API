@@ -12,7 +12,7 @@ router.get("/users", async (req, res) => {
       .populate("friends", "username email -_id")
       .populate("thoughts");
 
-    res.json(users);
+      return res.json(users);
   } catch (err) {
     errorHandler(err, res);
   }
@@ -23,7 +23,13 @@ router.get("/users/:user_id", async ({ params: { user_id } }, res) => {
   try {
     const user = await User.findById(user_id);
 
-    res.json(user);
+    if(!user){
+     return res.status(404).json({
+        message: 'User could not be found'
+      })
+    }
+
+    return res.json(user);
   } catch (err) {
     errorHandler(err, res);
   }
@@ -33,8 +39,12 @@ router.get("/users/:user_id", async ({ params: { user_id } }, res) => {
 router.post("/users", async (req, res) => {
   try {
     const user = await User.create(req.body);
-
-    res.json(user);
+    if(!user){
+      return res.status(404).json({
+         message: 'User could not be found'
+       })
+     }
+    return res.json(user);
   } catch (err) {
     errorHandler(err, res);
   }
@@ -55,7 +65,7 @@ router.put(
           .json({ message: "User not found with id " + user_id });
       }
 
-      res.json(updatedUser);
+      return res.json(updatedUser);
     } catch (err) {
       errorHandler(err, res);
     }
@@ -67,9 +77,13 @@ router.delete("/users/:user_id", async ({ params: { user_id } }, res) => {
   // remove associated thoughts when deleted
   try {
     const user = await User.findByIdAndDelete(user_id);
-    
+    if(!user){
+      return res.status(404).json({
+         message: 'User could not be found'
+       })
+     }
    
-    res.json({
+    return  res.json({
       message: "User deleted.",
       user,
     });
